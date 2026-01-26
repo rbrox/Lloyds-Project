@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/database.js';
+import usersRouter from './routes/users.js';
 
 // Load environment variables
 dotenv.config();
@@ -28,22 +29,25 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 404 handler
+// Routes
+app.use('/users', usersRouter);
+
+// Global error handler (MUST come before 404 handler)
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    errors: err.errors || []
+  });
+});
+
+// 404 handler (MUST come last)
 app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: 'Route not found',
     errors: [`Cannot ${req.method} ${req.path}`]
-  });
-});
-
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal server error',
-    errors: err.errors || []
   });
 });
 
