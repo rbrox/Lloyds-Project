@@ -1,8 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
 import connectDB from './config/database.js';
+import { swaggerSpec } from './config/swagger.js';
 import usersRouter from './routes/users.js';
+import slotsRouter from './routes/slots.js';
+import bookingsRouter from './routes/bookings.js';
 
 // Load environment variables
 dotenv.config();
@@ -20,6 +24,9 @@ app.use(express.urlencoded({ extended: true }));
 // Connect to MongoDB
 connectDB();
 
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Basic health check route
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -31,6 +38,8 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/users', usersRouter);
+app.use('/slots', slotsRouter);
+app.use('/bookings', bookingsRouter);
 
 // Global error handler (MUST come before 404 handler)
 app.use((err, req, res, next) => {
